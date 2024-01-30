@@ -1,0 +1,63 @@
+
+
+Multiple Kafka servers in a cluster:
+
+	High Availability: If one server fails, the others can continue to operate without interruption. 
+
+	Scalability: Kafka clusters can handle a large volume of data by distributing it across multiple brokers (servers). 
+
+	Load Balancing: Kafka distributes partitions across brokers, allowing for efficient load balancing. preventing bottleneck for data ingestion or consumption, better performance
+
+	Fault Tolerance: Kafka replicates data across multiple brokers, ensuring that data is not lost even if some brokers fail. 
+
+	Typically, Kafka brokers are set up on different hosts (physical servers or virtual machines) within a network to ensure fault tolerance and scalability. 
+	This distributed setup allows Kafka to take advantage of resources across multiple machines and provides redundancy in case of hardware failures or network partitions.
+
+	Kafka brokers in a cluster typically share a common ZooKeeper ensemble for coordination and metadata management. 
+	ZooKeeper is used by Kafka for various tasks, including leader election, broker discovery, topic configuration, and partition assignment.
+
+	When setting up a Kafka cluster, you'll configure each Kafka broker to connect to the same ZooKeeper ensemble. 
+	This ensures that all brokers can coordinate their activities and maintain consistency across the cluster.
+
+	Kafka and ZooKeeper interact:
+		Leader Election: ZooKeeper helps Kafka brokers in electing a leader for each partition of a topic.
+		Metadata Management: Kafka brokers register themselves and their topics with ZooKeeper. 
+		Configuration Management: Kafka stores its configuration settings in ZooKeeper, allowing for dynamic configuration changes without requiring a restart of the entire cluster.
+
+	Using multiple ZooKeeper ensembles is less common compared to using a single ensemble, but there are scenarios where it may be appropriate:
+
+
+	
+Steps
+	1. Download Kafka folders
+	2. Folder structure
+		bin - containes the executable .sh files
+		logs - logs stored here
+		config - .properties files, where configuration can be set
+	3. Starting a Zookeeper 
+		Can run on prem server, VM, Container
+		Configure (parameters, log_dir location, Zookeper_id, listener_port (2181)
+			config/zookeeper.properties
+		Run
+			bin/zookeeper_server_start.sh
+	4. Starting a server
+		can run on prem server, VM, Container once zookeper is running
+		can start multiple with the same zookeper
+		tmp/kafka_logs
+		Configure (parameters, log_dir location, kafka_Server_id, listener_port (9092)
+			config/server.properties
+		Run
+			bin/kafka_server.sh
+	5. Setting Up a topic
+		can run if Zookeeper and the server is running
+		messages stored tmp/kafka_logs/Topic (messages stored there, if num_of_partition set 1 only one dir)
+			bin/kafka_topic.sh --create ..bootstrap-server localhost:9092 --topic Topic
+			bin/kafka_topics.sh --list --zookeeper localhost:2181
+			bin/kafka_topics.sh --describe --zookeeper localhost:2181 --topic Topic
+
+	6. Producer
+		bin/kafka_console_producer.sh --broker-list localhost:9092 --topic Topic
+		after 7 days messages are deleted, append only approach with an offset
+	7. Consumer
+			bin/kafka_console_consumer.sh --bootstrap-server localhost:9092 --topic Topic
+		bin/kafka_console_consumer.sh --bootstrap-server localhost:9092 topic Topic --from-begining
